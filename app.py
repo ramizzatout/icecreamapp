@@ -1,17 +1,17 @@
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, text
-from datetime import datetime, date, timedelta
-import calendar
+# ... other imports ...
 
-# ===============================
-# CONFIG & DATABASE
-# ===============================
-st.set_page_config(page_title="Ice Cream Truck Manager", layout="wide")
-
-# This pulls the string from Streamlit Cloud Secrets safely
+# Use the URL from Secrets
 DB_URL = st.secrets["database"]["url"]
-engine = create_engine(DB_URL)
+
+# If the URL starts with 'postgres://', SQLAlchemy might complain. 
+# This fix ensures it uses 'postgresql://' which is the modern standard.
+if DB_URL.startswith("postgres://"):
+    DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(DB_URL, pool_pre_ping=True)
 STANDARD_HOURS = 9
 
 # ===============================
@@ -155,3 +155,4 @@ elif menu == "Reports":
         emp_name = st.selectbox("Employee", emp_dict.keys())
         df = pd.read_sql(text(f"SELECT * FROM attendance WHERE employee_id={emp_dict[emp_name]}"), engine)
         st.dataframe(df)
+
