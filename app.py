@@ -15,7 +15,13 @@ STANDARD_HOURS = 9
 # DATABASE CONNECTION
 # ===============================
 def get_connection():
-    return psycopg2.connect(st.secrets["database"]["url"])
+    try:
+        conn = psycopg2.connect(st.secrets["database"]["url"])
+        st.success("✅ Database Connected Successfully")
+        return conn
+    except Exception as e:
+        st.error(f"❌ Database connection failed: {e}")
+        st.stop()
 
 def init_db():
     conn = get_connection()
@@ -273,3 +279,4 @@ elif menu == "Reports":
 
         csv = df.to_csv(index=False).encode("utf-8")
         st.download_button("Download CSV", csv, "report.csv", "text/csv")
+
